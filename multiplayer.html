@@ -1089,7 +1089,7 @@ function toggleRef() {
 function renderForceEliminate(G) {
   const targets = G.players.filter(p => p.alive && p.seatIndex !== mySeatIndex);
   return '<div class="action-area">' +
-    '<div class="warning-msg">You have 10 or more coins — you must use Coup! Pay 10 coins to eliminate one of an opponent's cards.</div>' +
+    '<div class="warning-msg">You have 10 or more coins \u2014 you must use Coup! Pay 10 coins to eliminate one of an opponent\'s cards.</div>' +
     '<div class="action-buttons">' +
     targets.map(t => `<button class="action-btn target-btn" onclick="submitAction('COUP',null,${t.seatIndex})">${escHtml(t.name)} (${t.cardCount} cards, ${t.coins} coins)</button>`).join('') +
     '</div></div>';
@@ -1221,7 +1221,7 @@ function renderGameOver(G) {
     '<div style="max-width:640px;margin:60px auto;text-align:center;padding:24px">' +
     '<div style="background:linear-gradient(135deg,#181000,#221800);border:2px solid #d4a017;border-radius:18px;padding:36px;margin:20px 0 32px;box-shadow:0 0 40px #d4a01730">' +
     '<h2 style="color:#d4a017;font-size:1.8em">' + (isMe ? 'You are the King Maker!' : escHtml(w?.name || '?') + ' is the King Maker!') + '</h2>' +
-    '<p style="margin-top:12px;color:#b89050">The Chola dynasty's future has been decided.</p>' +
+    '<p style="margin-top:12px;color:#b89050">The Chola dynasty\'s future has been decided.</p>' +
     '</div>' +
     '<div class="game-log" style="max-height:200px;overflow-y:auto;background:#080e08;border:1px solid #1a2814;border-radius:10px;padding:14px;margin-bottom:24px">' +
     (G.log||[]).slice(0,20).map(l => '<div class="log-entry log-' + (l.type||'info') + '">' + escHtml(l.msg) + '</div>').join('') +
