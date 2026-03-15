@@ -1046,22 +1046,22 @@ function renderActionSelect(G, myPlayer) {
   const canReplace = myPlayer.coins >= 8 && myPlayer.cardCount === 1;
   return '<div class="action-area">' +
     '<div class="action-group"><h3>Common Actions</h3><div class="action-buttons">' +
-    '<button class="action-btn" onclick="submitAction('INCOME')">Income (+1 coin)</button>' +
-    '<button class="action-btn" onclick="submitAction('GIFT')">Gift (+2 coins, can be blocked)</button>' +
-    (myPlayer.coins >= 10 ? '<button class="action-btn" style="border-color:#d4a017;color:#ffd700" onclick="selectTarget('COUP',null)">Coup — pay 10 coins [target]</button>' : '') +
-    (canReplace ? '<button class="action-btn" onclick="submitAction('REPLACE_CARD')">Replace Card (costs 8 coins)</button>' : '') +
+    '<button class="action-btn" onclick="submitAction(\'INCOME\')">Income (+1 coin)</button>' +
+    '<button class="action-btn" onclick="submitAction(\'GIFT\')">Gift (+2 coins, can be blocked)</button>' +
+    (myPlayer.coins >= 10 ? '<button class="action-btn" style="border-color:#d4a017;color:#ffd700" onclick="selectTarget(\'COUP\',null)">Coup — pay 10 coins [target]</button>' : '') +
+    (canReplace ? '<button class="action-btn" onclick="submitAction(\'REPLACE_CARD\')">Replace Card (costs 8 coins)</button>' : '') +
     '</div></div>' +
     '<div class="action-group"><h3>Character Actions <span style="color:#5a5a3a;font-size:0.82em;text-transform:none;letter-spacing:0">(bluffing is allowed)</span></h3><div class="action-buttons">' +
-    '<button class="action-btn card-action-btn" onclick="submitAction('TAX')">Periya Pazhuvettarayar — Tax (+3 coins)</button>' +
-    '<button class="action-btn card-action-btn" onclick="submitAction('KUNDAVAI_COINS')">Kundavai — Treasury Gift (+2 coins)</button>' +
-    '<button class="action-btn card-action-btn" onclick="submitAction('DRAW2')">Arulmozhivarman — Recruit (draw 2, keep 2)</button>' +
-    '<button class="action-btn card-action-btn" onclick="selectTarget('STEAL','NANDINI')">Nandini — Steal (2 coins from target)</button>' +
-    '<button class="action-btn card-action-btn ' + (myPlayer.coins < 4 ? 'disabled-btn' : '') + '" ' + (myPlayer.coins < 4 ? 'disabled' : '') + ' onclick="selectTarget('ASSASSINATE','RAVID')">Ravidasan — Assassinate (costs 4 coins) [target]</button>' +
-    '<button class="action-btn card-action-btn" onclick="selectTarget('SPY','AAZHWAR')">Aazhwarkadiyan — Spy [target]</button>' +
-    '<button class="action-btn card-action-btn" onclick="selectTarget('GUESS','VANTHI')">Vanthiyathevan — Gamble (guess a card) [target]</button>' +
-    '<button class="action-btn card-action-btn" onclick="selectTarget('KANDAMARAN_EXCHANGE','KANDA')">Kandamaran — Force card swap [target]</button>' +
-    (exp ? '<button class="action-btn card-action-btn ' + (myPlayer.coins < 2 ? 'disabled-btn' : '') + '" ' + (myPlayer.coins < 2 ? 'disabled' : '') + ' onclick="selectTarget('DISCARD_REPLACE','ADITHA')">Aditha Karikalan — Decree (costs 2 coins) [target] ★</button>' +
-      '<button class="action-btn card-action-btn" onclick="selectTarget('GIVE_COINS','MANI')">Manimegalai — Sacrifice (give coins) [target] ★</button>' : '') +
+    '<button class="action-btn card-action-btn" onclick="submitAction(\'TAX\')">Periya Pazhuvettarayar — Tax (+3 coins)</button>' +
+    '<button class="action-btn card-action-btn" onclick="submitAction(\'KUNDAVAI_COINS\')">Kundavai — Treasury Gift (+2 coins)</button>' +
+    '<button class="action-btn card-action-btn" onclick="submitAction(\'DRAW2\')">Arulmozhivarman — Recruit (draw 2, keep 2)</button>' +
+    '<button class="action-btn card-action-btn" onclick="selectTarget(\'STEAL\',\'NANDINI\')">Nandini — Steal (2 coins from target)</button>' +
+    '<button class="action-btn card-action-btn ' + (myPlayer.coins < 4 ? 'disabled-btn' : '') + '" ' + (myPlayer.coins < 4 ? 'disabled' : '') + ' onclick="selectTarget(\'ASSASSINATE\',\'RAVID\')">Ravidasan — Assassinate (costs 4 coins) [target]</button>' +
+    '<button class="action-btn card-action-btn" onclick="selectTarget(\'SPY\',\'AAZHWAR\')">Aazhwarkadiyan — Spy [target]</button>' +
+    '<button class="action-btn card-action-btn" onclick="selectTarget(\'GUESS\',\'VANTHI\')">Vanthiyathevan — Gamble (guess a card) [target]</button>' +
+    '<button class="action-btn card-action-btn" onclick="selectTarget(\'KANDAMARAN_EXCHANGE\',\'KANDA\')">Kandamaran — Force card swap [target]</button>' +
+    (exp ? '<button class="action-btn card-action-btn ' + (myPlayer.coins < 2 ? 'disabled-btn' : '') + '" ' + (myPlayer.coins < 2 ? 'disabled' : '') + ' onclick="selectTarget(\'DISCARD_REPLACE\',\'ADITHA\')">Aditha Karikalan — Decree (costs 2 coins) [target] ★</button>' +
+      '<button class="action-btn card-action-btn" onclick="selectTarget(\'GIVE_COINS\',\'MANI\')">Manimegalai — Sacrifice (give coins) [target] ★</button>' : '') +
     '</div></div>' +
     renderCharReference(G) +
     '</div>';
@@ -1091,7 +1091,7 @@ function renderForceEliminate(G) {
   return '<div class="action-area">' +
     '<div class="warning-msg">You have 10 or more coins — you must use Coup! Pay 10 coins to eliminate one of an opponent's cards.</div>' +
     '<div class="action-buttons">' +
-    targets.map(t => '<button class="action-btn target-btn" onclick="submitAction('COUP',null,' + t.seatIndex + ')">' + escHtml(t.name) + ' (' + t.cardCount + ' cards, ' + t.coins + ' coins)</button>').join('') +
+    targets.map(t => `<button class="action-btn target-btn" onclick="submitAction('COUP',null,${t.seatIndex})">${escHtml(t.name)} (${t.cardCount} cards, ${t.coins} coins)</button>`).join('') +
     '</div></div>';
 }
 
@@ -1131,10 +1131,10 @@ function renderHumanResponseArea(G, myPlayer) {
     '<h3>' + escHtml(actor?.name || '?') + ' claims <em>' + escHtml(actionDesc) + '</em>' +
       (target ? ' → ' + (isTarget ? '<strong style="color:#ffd700">YOU</strong>' : escHtml(target.name)) : '') + '</h3>' +
     '<div class="response-buttons" style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px">' +
-    '<button class="action-btn pass-btn" onclick="submitResponse('PASS')">Pass — allow it</button>' +
-    (canQuestion ? '<button class="action-btn question-btn" onclick="submitResponse('QUESTION')">Question — challenge the claim</button>' : '') +
+    '<button class="action-btn pass-btn" onclick="submitResponse(\'PASS\')">Pass — allow it</button>' +
+    (canQuestion ? '<button class="action-btn question-btn" onclick="submitResponse(\'QUESTION\')">Question — challenge the claim</button>' : '') +
     blockOptions.map(bId =>
-      '<button class="action-btn block-btn" onclick="submitResponse('BLOCK','' + bId + '')">Block as ' + escHtml(getCharName(bId, G.includeExpansion)) + '</button>'
+      '<button class="action-btn block-btn" onclick="submitResponse(\'BLOCK\',\'\' + bId + \'\')">Block as ' + escHtml(getCharName(bId, G.includeExpansion)) + '</button>'
     ).join('') +
     '</div></div>';
 }
@@ -1145,8 +1145,8 @@ function renderQuestionBlockArea(G) {
   return '<div class="action-area response-area">' +
     '<h3>' + escHtml(blocker?.name || '?') + ' claims <em>' + escHtml(getCharName(pa.blockCharId, G.includeExpansion)) + '</em> to block your action!</h3>' +
     '<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">' +
-    '<button class="action-btn accept-btn" onclick="submitResponse('ACCEPT')">Accept the block</button>' +
-    '<button class="action-btn question-btn" onclick="submitResponse('QUESTION')">Challenge the block!</button>' +
+    '<button class="action-btn accept-btn" onclick="submitResponse(\'ACCEPT\')">Accept the block</button>' +
+    '<button class="action-btn question-btn" onclick="submitResponse(\'QUESTION\')">Challenge the block!</button>' +
     '</div></div>';
 }
 
@@ -1194,7 +1194,7 @@ function renderGiveCoinsSelect(G, myPlayer) {
     '<span id="give-val" style="color:#f0c040;font-size:1.3em;min-width:24px">0</span>' +
     '<span style="color:#b89050">coins</span>' +
     '</div>' +
-    '<button class="action-btn" onclick="submitGiveCoins(+document.getElementById('give-range').value)">Confirm</button>' +
+    '<button class="action-btn" onclick="submitGiveCoins(+document.getElementById(\'give-range\').value)">Confirm</button>' +
     '</div>';
 }
 
@@ -1206,7 +1206,7 @@ function renderGuessSelect(G) {
     '<h3 style="color:#b89050;margin-bottom:10px">Guess which character ' + escHtml(target?.name || '?') + ' holds:</h3>' +
     '<div class="guess-grid">' +
     Object.values(chars).map(ch =>
-      '<button class="action-btn guess-btn" onclick="submitGuessCard('' + ch.id + '')">' + escHtml(ch.shortName) + '</button>'
+      '<button class="action-btn guess-btn" onclick="submitGuessCard(\'\' + ch.id + \'\')">' + escHtml(ch.shortName) + '</button>'
     ).join('') +
     '</div>' +
     '<button class="action-btn cancel-btn" style="margin-top:10px" onclick="cancelGuess()">Cancel</button>' +
