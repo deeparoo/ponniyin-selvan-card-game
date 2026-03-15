@@ -77,7 +77,8 @@ module.exports = async (req, res) => {
         afterLossIsBlock: pa.afterLossIsBlock,
         afterLossIsBlockFail: pa.afterLossIsBlockFail,
         allCards: pa.actingPlayerId === mySeatIndex ? (pa.allCards || []) : [],
-        extra: pa.actingPlayerId === mySeatIndex ? (pa.extra || {}) : {}
+        extra: pa.actingPlayerId === mySeatIndex ? (pa.extra || {}) : {},
+        respondedSeats: Array.from(pa.responded instanceof Set ? pa.responded : (pa.responded_arr || []))
       };
     }
 

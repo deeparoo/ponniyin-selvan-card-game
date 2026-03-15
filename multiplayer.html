@@ -961,12 +961,19 @@ function renderGame(G) {
 
 function renderOpponent(p, G) {
   const isCurrent = G.currentPlayerIdx === p.seatIndex;
-  const isAwaitingThis = G.awaitingResponseFrom === p.seatIndex;
+  const pa = G.pendingAction;
+  const respondedSeats = pa?.respondedSeats || [];
+  // In simultaneous response window: show "deciding…" for players yet to respond (not the actor, not already passed)
+  const isDeciding = G.phase === 'HUMAN_RESPONSE' && p.alive && pa &&
+    p.seatIndex !== pa.actingPlayerId && !respondedSeats.includes(p.seatIndex);
+  const hasPassed = G.phase === 'HUMAN_RESPONSE' && p.alive && pa &&
+    p.seatIndex !== pa.actingPlayerId && respondedSeats.includes(p.seatIndex);
   return '<div class="opponent-area ' + (isCurrent ? 'current-turn' : '') + ' ' + (!p.alive ? 'eliminated' : '') + '">' +
     '<div class="opp-name">' + escHtml(p.name) +
       (!p.alive ? ' ✖' : '') +
       (isCurrent ? ' ◀' : '') +
-      (isAwaitingThis ? ' <span style="color:#e0a060;font-size:0.75em">(responding…)</span>' : '') +
+      (isDeciding ? ' <span style="color:#e0a060;font-size:0.75em">(deciding…)</span>' : '') +
+      (hasPassed ? ' <span style="color:#607050;font-size:0.75em">(passed)</span>' : '') +
     '</div>' +
     '<div class="opp-coins"><span class="coin"></span><span class="coin-count">' + p.coins + '</span><span style="color:#4a6a40;font-size:0.75em;margin-left:2px">coins</span></div>' +
     '<div class="opp-cards">' +
@@ -1061,11 +1068,21 @@ function renderActionArea(G, myPlayer) {
     return renderGiveCoinsSelect(G, myPlayer);
   }
 
-  // HUMAN_RESPONSE
+  // HUMAN_RESPONSE — simultaneous: all non-acting players decide at once
   if (phase === 'HUMAN_RESPONSE') {
-    if (G.awaitingResponseFrom !== mySeatIndex) {
-      const name = G.awaitingResponseFrom != null ? (G.players.find(p=>p.seatIndex===G.awaitingResponseFrom)?.name || '?') : '?';
-      return '<div class="action-area waiting">' + timerHtml + '<span class="waiting-spinner"></span>Waiting for ' + escHtml(name) + ' to respond…</div>';
+    if (!pa) return '<div class="action-area waiting">' + timerHtml + '<span class="waiting-spinner"></span>Waiting…</div>';
+    const respondedSeats = pa.respondedSeats || [];
+    if (pa.actingPlayerId === mySeatIndex) {
+      // I'm the acting player — wait for others
+      const pending = G.players.filter(p => p.alive && p.seatIndex !== mySeatIndex && !respondedSeats.includes(p.seatIndex));
+      const pendingNames = pending.map(p => escHtml(p.name)).join(', ');
+      return '<div class="action-area waiting">' + timerHtml + '<span class="waiting-spinner"></span>Waiting for ' + (pendingNames || 'others') + ' to respond…</div>';
+    }
+    if (respondedSeats.includes(mySeatIndex)) {
+      // I already passed — wait for others
+      const pending = G.players.filter(p => p.alive && p.seatIndex !== pa.actingPlayerId && !respondedSeats.includes(p.seatIndex));
+      const pendingNames = pending.map(p => escHtml(p.name)).join(', ');
+      return '<div class="action-area waiting">' + timerHtml + '<span class="waiting-spinner"></span>You passed. Waiting for ' + (pendingNames || 'others') + '…</div>';
     }
     return timerHtml + renderHumanResponseArea(G, myPlayer);
   }

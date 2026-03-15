@@ -223,24 +223,21 @@ function startActionResponse(G) {
     return;
   }
   pa.responded = new Set();
-  G.phase = 'RESPONSE_WINDOW';
-  collectNextResponse(G);
+  // Simultaneous response window — all non-acting players decide at once
+  G.phase = 'HUMAN_RESPONSE';
+  G.awaitingResponseFrom = null;
 }
 
-function collectNextResponse(G) {
+function checkAllPassed(G) {
+  // Called after a PASS — if everyone has responded, execute the action
   const pa = G.pendingAction;
   if (!pa) return;
-  const alive = getAlivePlayers(G);
-  const respondents = alive.filter(p =>
-    p.seatIndex !== pa.actingPlayerId && !pa.responded.has(p.seatIndex)
+  const pending = getAlivePlayers(G).filter(
+    p => p.seatIndex !== pa.actingPlayerId && !pa.responded.has(p.seatIndex)
   );
-  if (respondents.length === 0) {
+  if (pending.length === 0) {
     executeAction(G);
-    return;
   }
-  const next = respondents[0];
-  G.phase = 'HUMAN_RESPONSE';
-  G.awaitingResponseFrom = next.seatIndex;
 }
 
 // ══════════════════════════════════════════
@@ -590,20 +587,22 @@ function applyHumanAction(G, seatIndex, actionType, charId, targetSeatIndex, ext
 
 function applyHumanResponse(G, seatIndex, responseType, blockCharId) {
   if (G.phase !== 'HUMAN_RESPONSE') return G;
-  if (G.awaitingResponseFrom !== seatIndex) return G;
-
   const pa = G.pendingAction;
   if (!pa) return G;
 
+  // Any alive non-actor who hasn't responded yet is a valid responder
+  if (seatIndex === pa.actingPlayerId) return G;
+  if (pa.responded.has(seatIndex)) return G;
+  const responder = G.players.find(p => p.seatIndex === seatIndex);
+  if (!responder || !responder.alive) return G;
+
   pa.responded.add(seatIndex);
-  G.awaitingResponseFrom = null;
 
   const actingPlayer = G.players.find(p => p.seatIndex === pa.actingPlayerId);
-  const responder = G.players.find(p => p.seatIndex === seatIndex);
 
   if (responseType === 'PASS') {
     addLog(G, `${responder.name} passes.`);
-    collectNextResponse(G);
+    checkAllPassed(G);
     return G;
   }
 
