@@ -55,6 +55,9 @@ module.exports = async (req, res) => {
       });
     }
 
+    // Remove player from any other rooms before joining this one
+    await sql`DELETE FROM room_players WHERE id = ${playerId}`;
+
     // Count current players
     const players = await sql`
       SELECT seat_index FROM room_players

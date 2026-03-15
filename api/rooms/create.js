@@ -37,6 +37,9 @@ module.exports = async (req, res) => {
       VALUES (${code}, ${playerId}, 'LOBBY', ${!!includeExpansion})
     `;
 
+    // Remove player from any previous rooms (handles repeated room creation with same playerId)
+    await sql`DELETE FROM room_players WHERE id = ${playerId}`;
+
     // Add host as player with seat 0
     await sql`
       INSERT INTO room_players (id, room_code, seat_index, name, is_ready)
