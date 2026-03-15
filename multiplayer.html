@@ -1040,6 +1040,11 @@ function renderActionArea(G, myPlayer) {
     return renderTargetSelectUI(G, myPlayer);
   }
 
+  // KANDA_MY_CARD_UI (frontend phase — actor picks which of their cards to swap)
+  if (phase === 'KANDA_MY_CARD_UI') {
+    return renderKandaMyCardSelect(G, myPlayer);
+  }
+
   // GUESS_SELECT
   if (phase === 'GUESS_SELECT') {
     if (!pa || pa.actingPlayerId !== mySeatIndex) {
@@ -1179,6 +1184,24 @@ function renderTargetSelectUI(G, myPlayer) {
     targets.map(t => '<button class="action-btn target-btn" onclick="onTargetSelected(' + t.seatIndex + ')">' + escHtml(t.name) + ' (' + t.cardCount + ' cards, ' + t.coins + ' coins)</button>').join('') +
     '<button class="action-btn cancel-btn" onclick="cancelTargetSelect()">Cancel</button>' +
     '</div></div>';
+}
+
+function renderKandaMyCardSelect(G, myPlayer) {
+  const targetSeat = G._kandaTargetSeat;
+  const target = G.players.find(p => p.seatIndex === targetSeat);
+  return '<div class="action-area">' +
+    '<h3 style="color:#b89050;margin-bottom:4px">Kandamaran — choose which of your cards to give:</h3>' +
+    '<p style="color:#b0b0b0;margin-bottom:12px;font-size:0.9em">Swapping with ' + escHtml(target?.name || '?') + '</p>' +
+    '<div style="display:flex;gap:12px;flex-wrap:wrap">' +
+    myPlayer.cards.map(card =>
+      renderPortraitCard(card, G.includeExpansion, {
+        loseTarget: true,
+        onClickFn: `submitKandaCard('${card.uid}',${targetSeat})`
+      })
+    ).join('') +
+    '</div>' +
+    '<button class="action-btn cancel-btn" style="margin-top:10px" onclick="cancelTargetSelect()">Cancel</button>' +
+    '</div>';
 }
 
 function renderHumanResponseArea(G, myPlayer) {
@@ -1364,29 +1387,9 @@ function onTargetSelected(targetSeatIndex) {
 
 function showKandaCardSelect(targetSeatIndex) {
   if (!currentGameState) return;
-  const myP = currentGameState.players.find(p => p.seatIndex === mySeatIndex);
-  if (!myP) return;
-  const chars = getAllChars(currentGameState.includeExpansion);
-  const fakeState = Object.assign({}, currentGameState, { phase: 'KANDA_CARD_UI' });
-  // Inline render
-  const area = document.querySelector('.human-section .action-area') || document.createElement('div');
-  let html = '<div class="action-area">';
-  html += '<h3 style="color:#b89050;margin-bottom:10px">Kandamaran — choose which of your cards to give:</h3>';
-  html += '<div style="display:flex;gap:12px;flex-wrap:wrap">';
-  html += myP.cards.map(card => renderPortraitCard(card, currentGameState.includeExpansion, {
-    loseTarget: true,
-    onClickFn: `submitKandaCard('${card.uid}',${targetSeatIndex})`
-  })).join('');
-  html += '</div>';
-  html += '<button class="action-btn cancel-btn" style="margin-top:10px" onclick="cancelTargetSelect()">Cancel</button>';
-  html += '</div>';
-  area.outerHTML = html;
-  // Re-render with the kanda card selection overlay
-  const humanSection = document.querySelector('.human-section');
-  if (humanSection) {
-    const actionDiv = humanSection.querySelector('.action-area,.action-area.waiting');
-    if (actionDiv) actionDiv.outerHTML = html;
-  }
+  // Use the same fake-phase pattern as selectTarget() so renderGame() handles everything cleanly
+  const fakeState = Object.assign({}, currentGameState, { phase: 'KANDA_MY_CARD_UI', _kandaTargetSeat: targetSeatIndex });
+  renderGame(fakeState);
 }
 
 function submitKandaCard(myCardUid, targetSeatIndex) {
