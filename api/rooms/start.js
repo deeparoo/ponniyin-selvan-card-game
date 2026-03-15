@@ -16,7 +16,7 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const { roomCode, playerId } = req.body || {};
+    const { roomCode, playerId, includeExpansion } = req.body || {};
     if (!roomCode || !playerId) {
       return res.status(400).json({ error: 'roomCode and playerId are required' });
     }
@@ -64,7 +64,8 @@ module.exports = async (req, res) => {
       seatIndex: p.seat_index
     }));
 
-    const G = initMultiplayerGame(playerList, room.include_expansion);
+    const useExpansion = includeExpansion !== undefined ? !!includeExpansion : room.include_expansion;
+    const G = initMultiplayerGame(playerList, useExpansion);
     const serialized = serializeG(G);
 
     // Insert game state
