@@ -906,6 +906,12 @@ function doDrawTwo(G, actor) {
 
 function doGuess(G, actor, target, guessedCharId) {
   if (!target || !guessedCharId) { nextPlayer(G); return; }
+  // If the target was eliminated during the challenge phase, void the gamble
+  if (!target.alive) {
+    addLog(G, `${actor.name}'s gamble is void — ${target.name} has already been eliminated.`);
+    nextPlayer(G);
+    return;
+  }
   const correct = target.cards.some(c => c.charId === guessedCharId);
   if (correct) {
     const take = Math.min(3, target.coins);
