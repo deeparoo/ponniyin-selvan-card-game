@@ -1082,6 +1082,16 @@ function renderActionArea(G, myPlayer) {
     return timerHtml + renderLoseCardSelect(G, myPlayer);
   }
 
+  // KANDA_TARGET_SELECT — target picks which of their cards to swap
+  if (phase === 'KANDA_TARGET_SELECT') {
+    if (!pa || pa.targetPlayerId !== mySeatIndex) {
+      const actor = pa ? G.players.find(p => p.seatIndex === pa.actingPlayerId) : null;
+      const target = pa ? G.players.find(p => p.seatIndex === pa.targetPlayerId) : null;
+      return '<div class="action-area waiting">' + timerHtml + '<span class="waiting-spinner"></span>Waiting for ' + escHtml(target?.name || '?') + ' to choose a card to swap with ' + escHtml(actor?.name || '?') + '…</div>';
+    }
+    return timerHtml + renderKandaTargetSelect(G, myPlayer);
+  }
+
   // CARD_EXCHANGE_SELECT
   if (phase === 'CARD_EXCHANGE_SELECT') {
     if (G.currentPlayerIdx !== mySeatIndex) {
@@ -1218,6 +1228,22 @@ function renderLoseCardSelect(G, myPlayer) {
       renderPortraitCard(card, G.includeExpansion, {
         loseTarget: true,
         onClickFn: `submitLoseCard('${card.uid}')`
+      })
+    ).join('') +
+    '</div></div>';
+}
+
+function renderKandaTargetSelect(G, myPlayer) {
+  const pa = G.pendingAction;
+  const actor = pa ? G.players.find(p => p.seatIndex === pa.actingPlayerId) : null;
+  return '<div class="action-area">' +
+    '<h3 style="color:#e0a040;margin-bottom:4px">Kandamaran forces a swap!</h3>' +
+    '<p style="color:#b0b0b0;margin-bottom:12px;font-size:0.9em">' + escHtml(actor?.name || '?') + ' will take one of your cards. Choose which card to give up:</p>' +
+    '<div style="display:flex;gap:12px;flex-wrap:wrap">' +
+    myPlayer.cards.map(card =>
+      renderPortraitCard(card, G.includeExpansion, {
+        loseTarget: true,
+        onClickFn: `submitKandaTargetCard('${card.uid}')`
       })
     ).join('') +
     '</div></div>';
@@ -1436,6 +1462,22 @@ async function submitResponse(responseType, blockCharId) {
 async function submitLoseCard(cardUid) {
   try {
     const res = await fetch('/api/game/lose-card', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ roomCode: myRoomCode, playerId: myPlayerId, cardUid })
+    });
+    const data = await res.json();
+    if (!res.ok) { showGameError(data.error); return; }
+    lastVersion = -1;
+    await pollGameState();
+  } catch(e) {
+    showGameError('Network error: ' + e.message);
+  }
+}
+
+async function submitKandaTargetCard(cardUid) {
+  try {
+    const res = await fetch('/api/game/kanda-swap', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ roomCode: myRoomCode, playerId: myPlayerId, cardUid })

@@ -929,14 +929,37 @@ function doGuess(G, actor, target, guessedCharId) {
 
 function doKandamaranExchange(G, actor, target, myCardUid) {
   if (!target || target.cards.length < 2) { nextPlayer(G); return; }
-  const myIdx = myCardUid ? actor.cards.findIndex(c => c.uid === myCardUid) : 0;
-  const theirIdx = Math.floor(Math.random() * target.cards.length);
-  const myCard = actor.cards[myIdx >= 0 ? myIdx : 0] || actor.cards[0];
-  const theirCard = target.cards[theirIdx];
-  actor.cards[actor.cards.indexOf(myCard)] = theirCard;
+  // Store actor's chosen card and wait for target to choose which card to swap
+  G.pendingAction.extra = G.pendingAction.extra || {};
+  G.pendingAction.extra.myCardUid = myCardUid;
+  G.phase = 'KANDA_TARGET_SELECT';
+  addLog(G, `${actor.name} (Kandamaran) forces a swap — ${target.name} must choose a card to give up.`);
+}
+
+function applyKandaTargetCard(G, seatIndex, cardUid) {
+  if (G.phase !== 'KANDA_TARGET_SELECT') return G;
+  const pa = G.pendingAction;
+  if (!pa) return G;
+  if (pa.targetPlayerId !== seatIndex) return G;
+
+  const actor = G.players.find(p => p.seatIndex === pa.actingPlayerId);
+  const target = G.players.find(p => p.seatIndex === seatIndex);
+  if (!actor || !target) return G;
+
+  const myCardUid = pa.extra?.myCardUid;
+  const myCard = myCardUid ? actor.cards.find(c => c.uid === myCardUid) : actor.cards[0];
+  const theirCard = cardUid ? target.cards.find(c => c.uid === cardUid) : target.cards[0];
+
+  if (!myCard || !theirCard) { nextPlayer(G); return G; }
+
+  const myIdx = actor.cards.indexOf(myCard);
+  const theirIdx = target.cards.indexOf(theirCard);
+  actor.cards[myIdx] = theirCard;
   target.cards[theirIdx] = myCard;
+
   addLog(G, `${actor.name} (Kandamaran) forces a card swap with ${target.name}.`);
   nextPlayer(G);
+  return G;
 }
 
 function doAssassinate(G, actor, target) {
@@ -1005,6 +1028,7 @@ module.exports = {
   applyKeepCards,
   applyGiveCoins,
   applyGuessCard,
+  applyKandaTargetCard,
   serializeG,
   deserializeG,
   getBlockersFor,
