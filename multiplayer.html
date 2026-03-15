@@ -964,7 +964,7 @@ function renderOpponent(p, G) {
   const isAwaitingThis = G.awaitingResponseFrom === p.seatIndex;
   return '<div class="opponent-area ' + (isCurrent ? 'current-turn' : '') + ' ' + (!p.alive ? 'eliminated' : '') + '">' +
     '<div class="opp-name">' + escHtml(p.name) +
-      (!p.alive ? ' ✝' : '') +
+      (!p.alive ? ' ✖' : '') +
       (isCurrent ? ' ◀' : '') +
       (isAwaitingThis ? ' <span style="color:#e0a060;font-size:0.75em">(responding…)</span>' : '') +
     '</div>' +
