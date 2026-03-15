@@ -1157,7 +1157,7 @@ function renderLoseCardSelect(G, myPlayer) {
     myPlayer.cards.map(card =>
       renderPortraitCard(card, G.includeExpansion, {
         loseTarget: true,
-        onClickFn: 'submitLoseCard('' + card.uid + '')'
+        onClickFn: `submitLoseCard('${card.uid}')`
       })
     ).join('') +
     '</div></div>';
@@ -1289,7 +1289,7 @@ function showKandaCardSelect(targetSeatIndex) {
   html += '<div style="display:flex;gap:12px;flex-wrap:wrap">';
   html += myP.cards.map(card => renderPortraitCard(card, currentGameState.includeExpansion, {
     loseTarget: true,
-    onClickFn: 'submitKandaCard('' + card.uid + '',' + targetSeatIndex + ')'
+    onClickFn: `submitKandaCard('${card.uid}',${targetSeatIndex})`
   })).join('');
   html += '</div>';
   html += '<button class="action-btn cancel-btn" style="margin-top:10px" onclick="cancelTargetSelect()">Cancel</button>';
